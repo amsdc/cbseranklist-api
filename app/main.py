@@ -4,4 +4,4 @@ bp = Blueprint('main', __name__)
 
 @bp.route("/")
 def main():
-    return render_template("trunews_webclient.html")
+    return "Hello, World!"

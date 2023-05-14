@@ -17,10 +17,12 @@ from flask import jsonify, request, \
     render_template
 from werkzeug.exceptions import HTTPException
 
+from app import mysql
 from app.errors import bp
 
 @bp.app_errorhandler(HTTPException)
 def http_error(e):
+    return mysql.connection.rollback()
     return jsonify({"type": "HTTPException",
                     "message": e.description}), e.code
 
