@@ -65,3 +65,26 @@ class InvalidPageError(PaginationError):
     def __init__(self, nbpages, *a, **kw):
         super().__init__("Page given is out of range. Enter a value in"
                          f" the range [1, {nbpages}]", *a, **kw)
+                         
+
+class SchoolError(APIError):
+    pass
+
+
+class SchoolAlreadyExists(SchoolError):
+    code = 400
+    description = "That school already exists. Try changing the Affiliation Number/School code."
+    
+class SchoolAlreadyAssociated(SchoolError):
+    code = 400
+    description = "A school is already associated with this user"
+    
+    
+class NoSchoolAssociated(SchoolError):
+    code = 404
+    description = "No school is associated with this user"
+
+
+class SchoolNotFound(SchoolError):
+    code = 404
+    description = "School with that ID does not exist"

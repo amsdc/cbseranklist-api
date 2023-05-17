@@ -22,7 +22,7 @@ from app.errors import bp
 
 @bp.app_errorhandler(HTTPException)
 def http_error(e):
-    return mysql.connection.rollback()
+    mysql.connection.rollback()
     return jsonify({"type": "HTTPException",
                     "message": e.description}), e.code
 

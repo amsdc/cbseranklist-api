@@ -68,7 +68,7 @@ class MeUser(MethodView):
     def get(self):
         user = token_auth.current_user()
         cur = mysql.connection.cursor()
-        cur.execute("SELECT id, email, is_admin, `name`, `qualification` FROM user WHERE id=%s",
+        cur.execute("SELECT `id`, `email`, `is_admin`, `name`, `qualification` FROM `user` WHERE `id`=%s",
                     (user,))
         user_tup = cur.fetchone()
         cur.close()
@@ -77,8 +77,8 @@ class MeUser(MethodView):
                         "id": user_tup[0],
                         "email": user_tup[1],
                         "admin": bool(user_tup[2]),
-                        "name": user_tup[4],
-                        "qualification": user_tup[5]
+                        "name": user_tup[3],
+                        "qualification": user_tup[4]
                        })
     
     def put(self):
@@ -90,20 +90,22 @@ class MeUser(MethodView):
         if "password" in data and "opassword" in data:
             flag = True
             
-            cur.execute("SELECT password FROM user WHERE id=%s", (user,))
+            cur.execute("SELECT `password` FROM `user` WHERE `id`=%s", (user,))
             userp = cur.fetchone()
             if check_password_hash(userp[0], data["opassword"]):
-                cur.execute("UPDATE user SET password=%s WHERE id=%s",
+                cur.execute("UPDATE `user` SET `password`=%s WHERE `id`=%s",
                             (generate_password_hash(data["password"]), user))
                 
             else:
                 raise LoginError("old password does not match")
                 
         if "name" in data:
-            cur.execute("UPDATE `user` SET `name`=%s WHERE `id`=%s;", (user,))
+            flag = True
+            cur.execute("UPDATE `user` SET `name`=%s WHERE `id`=%s;", (data["name"], user,))
             
         if "qualification" in data:
-            cur.execute("UPDATE `user` SET `qualification`=%s WHERE `id`=%s;")
+            flag = True
+            cur.execute("UPDATE `user` SET `qualification`=%s WHERE `id`=%s;", (data["qualification"], user,))
             
         if flag:
             mysql.connection.commit()
@@ -116,7 +118,7 @@ class UserLists(MethodView):
     decorators = [token_auth.login_required, admin_required]
     def get(self):
         cur = mysql.connection.cursor()
-        cur.execute("SELECT id, email, is_admin, `name`, `qualification` FROM users")
+        cur.execute("SELECT `id`, `email`, `is_admin`, `name`, `qualification` FROM `user`")
         users_tup = cur.fetchall()
         ret_list = []
         for user_tup in users_tup:
@@ -193,7 +195,7 @@ class RegistrationGUI(MethodView):
             except:
                 raise InvalidEmailTokenError
             cur = mysql.connection.cursor()
-            cur.execute("INSERT INTO user (email, password) VALUES (%s, %s)",
+            cur.execute("INSERT INTO `user` (`email`, `password`) VALUES (%s, %s)",
                         (jtkn["email"], generate_password_hash(data["password"])))
             mysql.connection.commit()
             cur.close()
